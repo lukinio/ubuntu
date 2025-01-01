@@ -1,0 +1,98 @@
+#cloud-config
+autoinstall:
+  version: 1
+  identity:
+    hostname: ubuntu
+    username: lukinio
+    password: $6$ocMAMcQ6FKYm3h7f$HEZCNlqXCEz41p2Wqdh4lTRDA4R29KKGToPFizdZNFZKxM7qfSwOjeD70VqYsIXbKtZak.i/RwsYfqllSuGZT.
+  # locale: en_US
+  locale: pl_PL.UTF-8
+  keyboard:
+    layout: pl
+    variant: ''
+  storage:
+    config:
+      - id: disk1
+        type: disk
+        match:
+          size: largest
+        preserve: false
+        wipe: superblock
+        ptable: gpt
+        grub_device: true
+      - id: lvm-group
+        type: lvm_volgroup
+        name: ubuntu-vg
+        devices:
+          - disk1
+      - id: root
+        type: lvm_partition
+        volgroup: ubuntu-vg
+        size: 20G
+        mount:
+          path: /
+        filesystem: ext4
+      - id: var
+        type: lvm_partition
+        volgroup: ubuntu-vg
+        size: 10G
+        mount:
+          path: /var
+          options: [nodev, nosuid]
+        filesystem: ext4
+      - id: var-tmp
+        type: lvm_partition
+        volgroup: ubuntu-vg
+        size: 5G
+        mount:
+          path: /var/tmp
+          options: [nodev, noexec, nosuid]
+        filesystem: ext4
+      - id: var-log
+        type: lvm_partition
+        volgroup: ubuntu-vg
+        size: 5G
+        mount:
+          path: /var/log
+          options: [nodev, noexec, nosuid]
+        filesystem: ext4
+      - id: var-log-audit
+        type: lvm_partition
+        volgroup: ubuntu-vg
+        size: 2G
+        mount:
+          path: /var/log/audit
+          options: [nodev, noexec, nosuid]
+        filesystem: ext4
+      - id: tmp
+        type: lvm_partition
+        volgroup: ubuntu-vg
+        size: 5G
+        mount:
+          path: /tmp
+          options: [nodev, noexec, nosuid]
+        filesystem: ext4
+      - id: home
+        type: lvm_partition
+        volgroup: ubuntu-vg
+        size: 10G
+        mount:
+          path: /home
+          options: [nodev, nosuid]
+        filesystem: ext4
+      - id: swap
+        type: lvm_partition
+        volgroup: ubuntu-vg
+        size: 2G
+        mount:
+          swap: true
+  packages:
+    - vim
+    - curl
+    - wget
+    - net-tools
+  late-commands:
+    - curtin in-target --target=/target apt-get update
+    - curtin in-target --target=/target apt-get upgrade -y
+  user-data:
+    disable_root: true

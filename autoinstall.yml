@@ -1,0 +1,122 @@
+#cloud-config
+autoinstall:
+  version: 1
+  identity:
+    hostname: ubuntu
+    username: lukinio
+    password: $6$ocMAMcQ6FKYm3h7f$HEZCNlqXCEz41p2Wqdh4lTRDA4R29KKGToPFizdZNFZKxM7qfSwOjeD70VqYsIXbKtZak.i/RwsYfqllSuGZT.
+  # locale: en_US
+  locale: pl_PL.UTF-8
+  keyboard:
+    layout: pl
+    variant: ''
+
+  network:
+    network:
+      version: 2
+      ethernets:
+        eth0:
+          dhcp4: true
+  storage:
+    config:
+      - id: disk-sda
+        type: disk
+        match:
+          size: largest
+        ptable: gpt
+        wipe: superblock-recursive
+        preserve: false
+        name: sda
+        grub_device: true
+      - id: sda-part1
+        type: partition
+        size: 1M
+        flag: bios_grub
+        device: disk-sda
+      - id: sda-part2
+        type: partition
+        size: 1G
+        flag: boot
+        device: disk-sda
+      - id: sda-part3
+        type: partition
+        size: -1
+        device: disk-sda
+      - id: lvm-group
+        type: lvm_volgroup
+        name: ubuntu-vg
+        devices:
+          - sda-part3
+      - id: lv-root
+        type: lvm_partition
+        volgroup: ubuntu-vg
+        name: lv-root
+        size: 40G
+        filesystem: ext4
+        mount: /
+      - id: lv-var
+        name: lv-var
+        type: lvm_partition
+        volgroup: ubuntu-vg
+        size: 20G
+        mount:
+          path: /var
+          options: [nodev, nosuid]
+        filesystem: ext4
+      - id: var-tmp
+        name: var-tmp
+        type: lvm_partition
+        volgroup: ubuntu-vg
+        size: 5G
+        mount:
+          path: /var/tmp
+          options: [nodev, noexec, nosuid]
+        filesystem: ext4
+      - id: var-log
+        name: var-log
+        type: lvm_partition
+        volgroup: ubuntu-vg
+        size: 10G
+        mount:
+          path: /var/log
+          options: [nodev, noexec, nosuid]
+        filesystem: ext4
+      - id: var-log-audit
+        name: var-log-audit
+        type: lvm_partition
+        volgroup: ubuntu-vg
+        size: 5G
+        mount:
+          path: /var/log/audit
+          options: [nodev, noexec, nosuid]
+        filesystem: ext4
+      - id: tmp
+        name: tmp
+        type: lvm_partition
+        volgroup: ubuntu-vg
+        size: 10G
+        mount:
+          path: /tmp
+          options: [nodev, noexec, nosuid]
+        filesystem: ext4
+      - id: home
+        name: home
+        type: lvm_partition
+        volgroup: ubuntu-vg
+        size: -1
+        mount:
+          path: /home
+          options: [nodev, nosuid]
+        filesystem: ext4
+      - id: swap
+        type: lvm_partition
+        volgroup: ubuntu-vg
+        size: 2G
+        mount:
+          swap: true
+
+  user-data:
+    disable_root: true
+  late-commands:
+    - curtin in-target --target=/target apt-get update
+    - curtin in-target --target=/target apt-get upgrade -y
