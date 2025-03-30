@@ -4,8 +4,6 @@ autoinstall:
   locale: pl_PL
   keyboard:
     layout: pl
-  timezone:
-    zone: Europe/Warsaw
   identity:
     hostname: ubuntu
     username: lukinio
