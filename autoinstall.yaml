@@ -4,6 +4,8 @@ autoinstall:
   locale: pl_PL
   keyboard:
     layout: pl
+  timezone:
+    zone: Europe/Warsaw
   identity:
     hostname: ubuntu
     username: lukinio
@@ -12,6 +14,9 @@ autoinstall:
     config:
       - type: disk
         id: disk0
+        match:
+          # ssd: true
+          size: largest
         path: /dev/sda
         ptable: gpt
         wipe: superblock-recursive
