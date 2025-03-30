@@ -21,9 +21,32 @@ autoinstall:
         size: 512M
         flag: [ boot, esp ]
       - type: partition
+        id: partition-boot
+        device: disk0
+        size: 1G
+        flag: [ boot ]
+      - type: partition
         id: partition-lvm
         device: disk0
         size: -1
+      - type: format
+        id: format-efi
+        device: partition-efi
+        fstype: fat32
+        label: EFI
+      - type: mount
+        id: mount-efi
+        device: format-efi
+        path: /boot/efi
+      - type: format
+        id: format-boot
+        device: partition-boot
+        fstype: ext4
+        label: boot
+      - type: mount
+        id: mount-boot
+        device: format-boot
+        path: /boot
       - type: lvm_volumes
         id: lvm0
         volgroup: ubuntu-vg
