@@ -45,7 +45,7 @@ autoinstall:
         volume: partition-efi        # <-- use 'volume:' not 'device:'
         fstype: fat32
       - type: mount
-        device: format-efi
+        device: partition-efi
         path: /boot/efi
 
       # 6) Format + mount /boot
@@ -54,7 +54,7 @@ autoinstall:
         volume: partition-boot
         fstype: ext4
       - type: mount
-        device: format-boot
+        device: partition-boot
         path: /boot
 
       # 7) Define LVM volumes (no inline mount or format)
