@@ -8,50 +8,57 @@ autoinstall:
     hostname: ubuntu
     username: lukinio
     password: "$6$ldU404.TTvzf.Jma$05HY49JGX1lmTiwH0s3Q5fpiXZBRHsrDsK2Maw69jr38GvSn6pqz3x.buQ7gFTPVKgd4lcA.YQDtS04Kkbmt90"
+
   storage:
     config:
-      # --- Disk and partitioning ---
+      # 1) Disk and partitions
       - type: disk
         id: disk0
         match:
           size: largest
-        path: /dev/sda
         ptable: gpt
         wipe: superblock-recursive
+
       - type: partition
         id: partition-efi
         device: disk0
         size: 512M
         flag: [ boot, esp ]
+
       - type: partition
         id: partition-boot
         device: disk0
         size: 1G
         flag: [ boot ]
+
       - type: partition
         id: partition-lvm
         device: disk0
         size: -1
+
+      # 2) Format + mount EFI partition
       - type: format
         id: format-efi
-        device: partition-efi
+        volume: partition-efi        # <-- use 'volume:' not 'device:'
         fstype: fat32
         label: EFI
+
       - type: mount
-        id: mount-efi
-        device: format-efi
         path: /boot/efi
+        device: format-efi
+
+      # 3) Format + mount /boot
       - type: format
         id: format-boot
-        device: partition-boot
+        volume: partition-boot
         fstype: ext4
         label: boot
-      - type: mount
-        id: mount-boot
-        device: format-boot
-        path: /boot
 
-      # --- LVM volumes definition (no inline mounts) ---
+      - type: mount
+        path: /boot
+        device: format-boot
+
+      # 4) LVM setup: define volumes only
       - type: lvm_volumes
         id: lvm0
         volgroup: ubuntu-vg
@@ -67,42 +74,47 @@ autoinstall:
             size: 5%
           - name: swap
             size: 15%
-            swap: true
 
-      # --- Format and mount LVM volumes ---
+      # 5) Format + mount each LVM volume
       - type: format
         id: format-root
-        device: lvm0/root
+        volume: lvm0/root
         fstype: ext4
       - type: mount
-        id: mount-root
-        device: format-root
         path: /
-        options: [defaults]
+        device: format-root
+
       - type: format
         id: format-var
-        device: lvm0/var
+        volume: lvm0/var
         fstype: ext4
       - type: mount
-        id: mount-var
-        device: format-var
         path: /var
+        device: format-var
         options: [defaults, noexec, nodev, nosuid]
+
       - type: format
         id: format-home
-        device: lvm0/home
+        volume: lvm0/home
         fstype: ext4
       - type: mount
-        id: mount-home
-        device: format-home
         path: /home
+        device: format-home
         options: [defaults, noexec, nodev, nosuid]
+
       - type: format
         id: format-tmp
-        device: lvm0/tmp
+        volume: lvm0/tmp
         fstype: ext4
       - type: mount
-        id: mount-tmp
-        device: format-tmp
         path: /tmp
+        device: format-tmp
         options: [defaults, noexec, nodev, nosuid]
+
+      # 6) Format swap volume (no mount for swap)
+      - type: format
+        id: format-swap
+        volume: lvm0/swap
+        fstype: swap
+
+  packages: []
