@@ -23,13 +23,15 @@ autoinstall:
         id: partition-efi
         device: disk0
         size: 512M
-        flag: [ boot, esp ]
+        # Correct key is 'flags:', not 'flag:'
+        flags: [ boot, esp ]
 
       - type: partition
         id: partition-boot
         device: disk0
         size: 1G
-        flag: [ boot ]
+        # If you want a boot flag, use flags: [ boot ]
+        flags: [ boot ]
 
       - type: partition
         id: partition-lvm
