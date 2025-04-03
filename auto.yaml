@@ -11,7 +11,7 @@ autoinstall:
 
   storage:
     config:
-      # 1) Disk and partitions
+      # 1) Select the disk
       - type: disk
         id: disk0
         match:
@@ -19,48 +19,45 @@ autoinstall:
         ptable: gpt
         wipe: superblock-recursive
 
+      # 2) EFI partition
       - type: partition
         id: partition-efi
         device: disk0
         size: 512M
-        # Correct key is 'flags:', not 'flag:'
         flags: [ boot, esp ]
 
+      # 3) /boot partition
       - type: partition
         id: partition-boot
         device: disk0
         size: 1G
-        # If you want a boot flag, use flags: [ boot ]
         flags: [ boot ]
 
+      # 4) LVM partition
       - type: partition
         id: partition-lvm
         device: disk0
         size: -1
 
-      # 2) Format + mount EFI partition
+      # 5) Format + mount EFI
       - type: format
         id: format-efi
         volume: partition-efi        # <-- use 'volume:' not 'device:'
         fstype: fat32
-        label: EFI
-
       - type: mount
-        path: /boot/efi
         device: format-efi
+        path: /boot/efi
 
-      # 3) Format + mount /boot
+      # 6) Format + mount /boot
       - type: format
         id: format-boot
         volume: partition-boot
         fstype: ext4
-        label: boot
-
       - type: mount
-        path: /boot
         device: format-boot
+        path: /boot
 
-      # 4) LVM setup: define volumes only
+      # 7) Define LVM volumes (no inline mount or format)
       - type: lvm_volumes
         id: lvm0
         volgroup: ubuntu-vg
@@ -77,43 +74,43 @@ autoinstall:
           - name: swap
             size: 15%
 
-      # 5) Format + mount each LVM volume
+      # 8) Format + mount each LVM volume
       - type: format
         id: format-root
         volume: lvm0/root
         fstype: ext4
       - type: mount
-        path: /
         device: format-root
+        path: /
 
       - type: format
         id: format-var
         volume: lvm0/var
         fstype: ext4
       - type: mount
-        path: /var
         device: format-var
-        options: [defaults, noexec, nodev, nosuid]
+        path: /var
+        options: [ defaults, noexec, nodev, nosuid ]
 
       - type: format
         id: format-home
         volume: lvm0/home
         fstype: ext4
       - type: mount
-        path: /home
         device: format-home
-        options: [defaults, noexec, nodev, nosuid]
+        path: /home
+        options: [ defaults, noexec, nodev, nosuid ]
 
       - type: format
         id: format-tmp
         volume: lvm0/tmp
         fstype: ext4
       - type: mount
-        path: /tmp
         device: format-tmp
-        options: [defaults, noexec, nodev, nosuid]
+        path: /tmp
+        options: [ defaults, noexec, nodev, nosuid ]
 
-      # 6) Format swap volume (no mount for swap)
+      # 9) Format swap (no mount step)
       - type: format
         id: format-swap
         volume: lvm0/swap
