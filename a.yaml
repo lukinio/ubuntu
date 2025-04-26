@@ -25,7 +25,7 @@ autoinstall:
         id: boot-part
         device: disk0
         size: 512M
-        flag: [boot, esp]
+        flag: boot
 
       - type: partition
         id: bootfs-part
