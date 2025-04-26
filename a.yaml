@@ -1,0 +1,116 @@
+#cloud-config
+autoinstall:
+  version: 1
+  locale: pl_PL
+  keyboard:
+    layout: pl
+  identity:
+    hostname: ubuntu
+    username: lukinio
+    password: "$6$ldU404.TTvzf.Jma$05HY49JGX1lmTiwH0s3Q5fpiXZBRHsrDsK2Maw69jr38GvSn6pqz3x.buQ7gFTPVKgd4lcA.YQDtS04Kkbmt90"
+
+  storage:
+    swap:
+      size: 0           # disable default swap, as we declare our own
+    config:
+      - type: disk
+        id: disk0
+        path: /dev/sda
+        ptable: gpt
+        wipe: superblock-recursive
+        grub_device: true
+
+      - type: partition
+        id: boot-part
+        device: disk0
+        size: 512M
+        flag: boot
+        partition_type: EF00
+
+      - type: partition
+        id: bootfs-part
+        device: disk0
+        size: 1G
+
+      - type: partition
+        id: root-part
+        device: disk0
+        size: 20G
+
+      - type: partition
+        id: var-part
+        device: disk0
+        size: 10G
+
+      - type: partition
+        id: home-part
+        device: disk0
+        size: 10G
+
+      - type: partition
+        id: swap-part
+        device: disk0
+        size: 4G
+
+      - type: format
+        id: boot-part-fs
+        volume: boot-part
+        fstype: vfat
+
+      - type: format
+        id: bootfs-fs
+        volume: bootfs-part
+        fstype: ext4
+
+      - type: format
+        id: root-fs
+        volume: root-part
+        fstype: ext4
+
+      - type: format
+        id: var-fs
+        volume: var-part
+        fstype: ext4
+
+      - type: format
+        id: home-fs
+        volume: home-part
+        fstype: ext4
+
+      - type: format
+        id: swap-fs
+        volume: swap-part
+        fstype: swap
+
+      - type: mount
+        id: boot-part-mnt
+        device: boot-part-fs
+        path: /boot/efi
+
+      - type: mount
+        id: bootfs-mnt
+        device: bootfs-fs
+        path: /boot
+
+      - type: mount
+        id: root-mnt
+        device: root-fs
+        path: /
+
+      - type: mount
+        id: var-mnt
+        device: var-fs
+        path: /var
+
+      - type: mount
+        id: home-mnt
+        device: home-fs
+        path: /home
+
+      - type: mount
+        id: swap-mnt
+        device: swap-fs
+        path: none
+
+
+  packages: []
