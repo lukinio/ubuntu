@@ -14,6 +14,7 @@ autoinstall:
       size: 0           # disable default swap, as we declare our own
     config:
       - type: disk
+        name: disk
         id: disk0
         path: /dev/sda
         ptable: gpt
