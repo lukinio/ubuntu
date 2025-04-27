@@ -30,7 +30,7 @@ autoinstall:
                 id: partition-efi
                 device: disk0
                 size: 512M
-                flags: [esp]
+                flags: [boot, esp]
             -
                 type: format
                 id: format-efi
