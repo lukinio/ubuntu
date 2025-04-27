@@ -8,10 +8,12 @@ autoinstall:
     hostname: ubuntu
     username: lukinio
     password: "$6$ldU404.TTvzf.Jma$05HY49JGX1lmTiwH0s3Q5fpiXZBRHsrDsK2Maw69jr38GvSn6pqz3x.buQ7gFTPVKgd4lcA.YQDtS04Kkbmt90"
+
   storage:
     swap:
       size: 0        # disable default swap
     config:
+      # Wipe /dev/sda and use GPT
       - type: disk
         id: disk0
         match:
@@ -34,29 +36,31 @@ autoinstall:
         size: 512M
         flag: esp
 
+      # /boot (1 GiB)
       - type: partition
         id: partition-boot
         device: disk0
         size: 1G
         flag: boot
 
+      # Remainder → LVM PV
       - type: partition
         id: partition-lvm
         device: disk0
         size: -1
 
-      # ←–– use `volume:`, not `device:`
+      # Format & mount ESP
       - type: format
         id: format-efi
         volume: partition-efi
         fstype: fat32
         label: EFI
-
       - type: mount
         id: mount-efi
         device: format-efi
         path: /boot/efi
 
+      # Format & mount /boot
       - type: format
         id: format-boot
         volume: partition-boot
