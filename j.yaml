@@ -23,6 +23,7 @@ autoinstall:
                 ptable: gpt
                 wipe: superblock-recursive
                 grub_device: true
+
             # BIOS Boot Partition (1MiB)
             -
                 type: partition
@@ -31,6 +32,7 @@ autoinstall:
                 size: 1M
                 flag: bios_grub
 
+            # EFI partition
             -
                 type: partition
                 id: partition-efi
@@ -38,7 +40,7 @@ autoinstall:
                 size: 512M
                 flag: esp
 
-            # /boot (1 GiB)
+            # Boot partition (1 GiB)
             -
                 type: partition
                 id: partition-boot
