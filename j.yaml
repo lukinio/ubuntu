@@ -23,7 +23,7 @@ autoinstall:
                 ptable: gpt
                 wipe: superblock-recursive
                 grub_device: true
-            # ── BIOS Boot Partition (1MiB) ──
+            # BIOS Boot Partition (1MiB)
             -
                 type: partition
                 id: partition-bios
