@@ -1,0 +1,82 @@
+storage:
+  swap:
+    size: 0        # disable default swap
+  config:
+    - type: disk
+      id: disk0
+      match:
+        size: largest
+      path: /dev/sda
+      ptable: gpt
+      wipe: superblock-recursive
+      grub_device: true
+
+    - type: partition
+      id: partition-efi
+      device: disk0
+      size: 512M
+      flag: [boot, esp]
+
+    - type: partition
+      id: partition-boot
+      device: disk0
+      size: 1G
+      flag: [boot]
+
+    - type: partition
+      id: partition-lvm
+      device: disk0
+      size: -1
+
+    # ←–– use `volume:`, not `device:`
+    - type: format
+      id: format-efi
+      volume: partition-efi
+      fstype: fat32
+      label: EFI
+
+    - type: mount
+      id: mount-efi
+      device: format-efi
+      path: /boot/efi
+
+    - type: format
+      id: format-boot
+      volume: partition-boot
+      fstype: ext4
+      label: boot
+
+    - type: mount
+      id: mount-boot
+      device: format-boot
+      path: /boot
+
+    # LVM: define VG then LVs
+    - type: lvm_volumes
+      id: lvm0
+      volgroup: ubuntu-vg
+      devices: [partition-lvm]
+      volumes:
+        - name: root
+          size: 50%
+          fstype: ext4
+          mountpoint: /
+          options: [defaults]
+        - name: var
+          size: 15%
+          fstype: ext4
+          mountpoint: /var
+          options: [defaults,noexec,nodev,nosuid]
+        - name: home
+          size: 15%
+          fstype: ext4
+          mountpoint: /home
+          options: [defaults,noexec,nodev,nosuid]
+        - name: tmp
+          size: 5%
+          fstype: ext4
+          mountpoint: /tmp
+          options: [defaults,noexec,nodev,nosuid]
+        - name: swap
+          size: 15%
+          fstype: swap
