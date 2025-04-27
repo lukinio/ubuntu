@@ -1,0 +1,142 @@
+#cloud-config
+autoinstall:
+  version: 1
+  locale: pl_PL
+  keyboard:
+    layout: pl
+  identity:
+    hostname: ubuntu
+    username: lukinio
+    password: "$6$ldU404.TTvzf.Jma$05HY49JGX1lmTiwH0s3Q5fpiXZBRHsrDsK2Maw69jr38GvSn6pqz3x.buQ7gFTPVKgd4lcA.YQDtS04Kkbmt90"
+  storage:
+    swap:
+      size: 0        # disable default swap
+    config:
+      - type: disk
+        id: disk0
+        match:
+          size: largest
+        path: /dev/sda
+        ptable: gpt
+        wipe: superblock-recursive
+        grub_device: true
+
+      - type: partition
+        id: partition-efi
+        device: disk0
+        size: 512M
+        flag: [boot, esp]
+
+      - type: partition
+        id: partition-boot
+        device: disk0
+        size: 1G
+        flag: [boot]
+
+      - type: partition
+        id: partition-lvm
+        device: disk0
+        size: -1
+
+      # ←–– use `volume:`, not `device:`
+      - type: format
+        id: format-efi
+        volume: partition-efi
+        fstype: fat32
+        label: EFI
+
+      - type: mount
+        id: mount-efi
+        device: format-efi
+        path: /boot/efi
+
+      - type: format
+        id: format-boot
+        volume: partition-boot
+        fstype: ext4
+        label: boot
+
+      - type: mount
+        id: mount-boot
+        device: format-boot
+        path: /boot
+
+      # 1) Create the VG on the LVM partition
+      - type: lvm_volgroup
+        id: vg0
+        name: ubuntu-vg
+        devices: [ partition-lvm ]
+
+      # 2) Logical Volume: root (50%)
+      - type: lvm_partition
+        id: lv-root
+        name: root
+        volgroup: vg0
+        size: 50%
+      - type: format
+        id: fs-root
+        volume: lv-root
+        fstype: ext4
+      - type: mount
+        id: mount-root
+        device: fs-root
+        path: /
+
+      # 3) Logical Volume: /var (15%)
+      - type: lvm_partition
+        id: lv-var
+        name: var
+        volgroup: vg0
+        size: 15%
+      - type: format
+        id: fs-var
+        volume: lv-var
+        fstype: ext4
+      - type: mount
+        id: mount-var
+        device: fs-var
+        path: /var
+
+      # 4) Logical Volume: /home (15%)
+      - type: lvm_partition
+        id: lv-home
+        name: home
+        volgroup: vg0
+        size: 15%
+      - type: format
+        id: fs-home
+        volume: lv-home
+        fstype: ext4
+      - type: mount
+        id: mount-home
+        device: fs-home
+        path: /home
+
+      # 5) Logical Volume: /tmp (5%)
+      - type: lvm_partition
+        id: lv-tmp
+        name: tmp
+        volgroup: vg0
+        size: 5%
+      - type: format
+        id: fs-tmp
+        volume: lv-tmp
+        fstype: ext4
+      - type: mount
+        id: mount-tmp
+        device: fs-tmp
+        path: /tmp
+
+      # 6) Logical Volume: swap (15%)
+      - type: lvm_partition
+        id: lv-swap
+        name: swap
+        volgroup: vg0
+        size: 15%
+      - type: format
+        id: fs-swap
+        volume: lv-swap
+        fstype: swap
+        # no mount action for swap
+
+  packages: []
