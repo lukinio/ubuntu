@@ -24,21 +24,13 @@ autoinstall:
                 wipe: superblock-recursive
                 grub_device: true
 
-            # # BIOS Boot Partition (1MiB)
-            # -
-            #     type: partition
-            #     id: partition-bios
-            #     device: disk0
-            #     size: 1M
-            #     flag: bios_grub
-
             # EFI partition (512MiB)
             -
                 type: partition
                 id: partition-efi
                 device: disk0
                 size: 512M
-                flag: esp
+                flags: [esp]
             -
                 type: format
                 id: format-efi
@@ -57,7 +49,6 @@ autoinstall:
                 id: partition-boot
                 device: disk0
                 size: 1G
-                flag: boot
             -
                 type: format
                 id: format-boot
